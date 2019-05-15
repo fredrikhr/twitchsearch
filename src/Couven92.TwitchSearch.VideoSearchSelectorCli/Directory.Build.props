@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>preview1</VersionSuffix>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\Directory.Build.props"/>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Product>Twitch.tv Advanced Video Search and property Selector CLI</Product>
+  </PropertyGroup>
+</Project>
