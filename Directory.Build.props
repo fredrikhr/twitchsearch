@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Condition="Exists('$(MSBuildThisFileDirectory)\Directory.Meta.props')" Project="$(MSBuildThisFileDirectory)\Directory.Meta.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework Condition="'$(BuildDefaultTargetFramework)'!=''">netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+  <PropertyGroup Label="BasePath">
+    <BaseOutputPath>$(MSBuildThisFileDirectory)bin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Features>IOperation</Features>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <Import Condition="Exists('$(MSBuildThisFileDirectory)\Directory.Version.props')" Project="$(MSBuildThisFileDirectory)\Directory.Version.props" />
+  <PropertyGroup Label="Version" Condition="'$(VersionPrefix)'!=''">
+    <!--<VersionPrefix>0.0.1</VersionPrefix>-->
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <AssemblyVersion Condition="'$(BuildId)'==''">$(FileVersion)</AssemblyVersion>
+    <AssemblyVersion Condition="'$(BuildId)'!=''">$(FileVersion).$(BuildId)</AssemblyVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.DotNet.Analyzers.Compatibility" Version="0.2.12-alpha" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Label="SourceLink">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
