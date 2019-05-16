@@ -1,10 +1,22 @@
-﻿using System.CommandLine;
-using System.CommandLine.Binding;
+﻿using System;
+using System.CommandLine;
+using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+#if DEBUG
+using Microsoft.Extensions.Logging;
+#endif
+
+using Polly;
+
+using THNETII.Common;
 
 namespace Couven92.TwitchSearch.VideoSearchSelectorCli
 {
@@ -12,35 +24,53 @@ namespace Couven92.TwitchSearch.VideoSearchSelectorCli
     {
         public static Task<int> Main(string[] args)
         {
-            Option login;
-
-            login = new Option(nameof(login),
-                description: "",
-                argument: new Argument<string> { Arity = ArgumentArity.ZeroOrMore }
-                );
-
-
-            var cliRootCommand = new RootCommand(
-                description: GetDescription(),
-                symbols: new Symbol[] { login },
-                handler: CommandHandler.Create<ParseResult, IConsole, BindingContext>((parseResult, console, bindingCtx) =>
-                {
-                    return Host.CreateDefaultBuilder()
-                        .ConfigureServices(services =>
-                        {
-                            services.AddSingleton(parseResult);
-                            services.AddSingleton(console);
-                            services.AddSingleton(bindingCtx);
-
-                            services.AddHostedService<VideoSearchSelectorApp>();
-                            services.Configure<VideoSearchSelectorOptions>(options =>
-                            {
-                                var loginValue = parseResult.FindResultFor(login).GetValueOrDefault<string>();
-                            });
-                        })
-                        .RunConsoleAsync();
-                }));
-            return cliRootCommand.InvokeAsync(args);
+            return new CommandLineBuilder(new RootCommand(GetDescription()))
+                .AddVideoSearchSelectorOptions()
+                .UseDefaults()
+                .UseHost(CreateHostBuilder)
+                .Build().InvokeAsync(args);
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+#if DEBUG
+                .ConfigureLogging(logging => logging.AddDebug())
+#endif
+                .ConfigureServices(services =>
+                {
+                    services.AddOptions<VideoSearchSelectorOptions>()
+                        .Validate(options => options.IsValid());
+                    services.AddHttpClient("twitch")
+                        .ConfigureHttpClient((serviceProvider, httpClient) =>
+                        {
+                            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                            if (configuration.GetValue<string>("TwitchApi:ClientId").TryNotNullOrWhiteSpace(out string clientId))
+                            {
+                                httpClient.DefaultRequestHeaders.Add("Client-ID", clientId);
+                            }
+                        })
+                        .AddPolicyHandler(Policy
+                            .HandleResult<HttpResponseMessage>(msg => (int)msg.StatusCode == 429)
+                            .WaitAndRetryForeverAsync(
+                                sleepDurationProvider: (i, error, ctx) =>
+                                {
+                                    var msg = error.Result;
+                                    TimeSpan? resetTimespan = null;
+                                    if (msg.Headers.Date.HasValue &&
+                                        msg.Headers.TryGetValues("Ratelimit-Reset", out var ratelimitResetHeaderValues) &&
+                                        ratelimitResetHeaderValues.FirstOrDefault().TryNotNullOrEmpty(out string ratelimitResetString) &&
+                                        int.TryParse(ratelimitResetString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ratelimitResetEpochOffsetSeconds))
+                                    {
+                                        var epoch = new DateTimeOffset(1970, 01, 01, 00, 00, 00, TimeSpan.Zero);
+                                        var resetTimestamp = epoch + TimeSpan.FromSeconds(ratelimitResetEpochOffsetSeconds);
+                                        resetTimespan = resetTimestamp - msg.Headers.Date.Value;
+                                    }
+
+                                    return resetTimespan ?? TimeSpan.FromSeconds(10);
+                                },
+                                onRetryAsync: (msg, ts, i, ctx) => Task.CompletedTask)
+                        );
+                    services.AddHostedService<VideoSearchSelectorApp>();
+                });
     }
 }
