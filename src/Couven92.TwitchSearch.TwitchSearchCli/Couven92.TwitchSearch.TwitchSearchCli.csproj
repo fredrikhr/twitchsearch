@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <UserSecretsId>{CF7FD2CD-18CF-48DE-8D07-3FA8F9428CF6}</UserSecretsId>
+    <UserSecretsId>{903BA934-4DAD-44AE-8482-F28B9AED8008}</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\dotnet-common\src\THNETII.Common\THNETII.Common.csproj" />
-    <ProjectReference Include="..\..\dotnet-common\src\THNETII.DependencyInjection\THNETII.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\dotnet-common\src\THNETII.Networking.Http\THNETII.Networking.Http.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.*.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
   </ItemGroup>
 
 </Project>

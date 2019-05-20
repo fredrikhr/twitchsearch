@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Couven92.TwitchSearch.VideoSearchSelectorCli
+namespace Couven92.TwitchSearch.TwitchSearchCli
 {
     public static partial class Program
     {

@@ -18,14 +18,13 @@ using Polly;
 
 using THNETII.Common;
 
-namespace Couven92.TwitchSearch.VideoSearchSelectorCli
+namespace Couven92.TwitchSearch.TwitchSearchCli
 {
     public static partial class Program
     {
         public static Task<int> Main(string[] args)
         {
             return new CommandLineBuilder(new RootCommand(GetDescription()))
-                .AddVideoSearchSelectorOptions()
                 .UseDefaults()
                 .UseHost(CreateHostBuilder)
                 .Build().InvokeAsync(args);
@@ -36,10 +35,12 @@ namespace Couven92.TwitchSearch.VideoSearchSelectorCli
 #if DEBUG
                 .ConfigureLogging(logging => logging.AddDebug())
 #endif
+                .ConfigureHostConfiguration(config =>
+                {
+                    config.AddUserSecrets<TwitchSearchCliApp>(optional: true);
+                })
                 .ConfigureServices(services =>
                 {
-                    services.AddOptions<VideoSearchSelectorOptions>()
-                        .Validate(options => options.IsValid());
                     services.AddHttpClient("twitch")
                         .ConfigureHttpClient((serviceProvider, httpClient) =>
                         {
@@ -70,7 +71,7 @@ namespace Couven92.TwitchSearch.VideoSearchSelectorCli
                                 },
                                 onRetryAsync: (msg, ts, i, ctx) => Task.CompletedTask)
                         );
-                    services.AddHostedService<VideoSearchSelectorApp>();
+                    services.AddHostedService<TwitchSearchCliApp>();
                 });
     }
 }
