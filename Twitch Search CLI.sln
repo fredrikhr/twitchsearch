@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Couven92.TwitchSearch.Twitc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "THNETII.Networking.Http", "dotnet-common\src\THNETII.Networking.Http\THNETII.Networking.Http.csproj", "{A4A4D639-5F82-4D4A-A8FF-C01F6B6EE66F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "THNETII.CommandLine.Hosting", "dotnet-common\src\THNETII.CommandLine.Hosting\THNETII.CommandLine.Hosting.csproj", "{280C7A40-40BC-46A0-928C-68083AA0CA95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{A4A4D639-5F82-4D4A-A8FF-C01F6B6EE66F}.Release|x64.Build.0 = Release|Any CPU
 		{A4A4D639-5F82-4D4A-A8FF-C01F6B6EE66F}.Release|x86.ActiveCfg = Release|Any CPU
 		{A4A4D639-5F82-4D4A-A8FF-C01F6B6EE66F}.Release|x86.Build.0 = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|x64.Build.0 = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Debug|x86.Build.0 = Debug|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|x64.ActiveCfg = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|x64.Build.0 = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|x86.ActiveCfg = Release|Any CPU
+		{280C7A40-40BC-46A0-928C-68083AA0CA95}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +111,7 @@ Global
 		{62E139E1-57F0-40D2-8CC3-D12F578AF4E8} = {A456BE98-CD7C-4426-91A0-AC87FBAF1941}
 		{64D16AA8-7C61-4BE4-BFAF-D541E91F35FC} = {5E6B44E3-3104-44CC-A0E7-12386FD8678A}
 		{A4A4D639-5F82-4D4A-A8FF-C01F6B6EE66F} = {A456BE98-CD7C-4426-91A0-AC87FBAF1941}
+		{280C7A40-40BC-46A0-928C-68083AA0CA95} = {A456BE98-CD7C-4426-91A0-AC87FBAF1941}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E8C24BF8-4986-456A-9232-9107F92247AE}

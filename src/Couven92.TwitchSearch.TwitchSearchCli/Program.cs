@@ -10,12 +10,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-#if DEBUG
-using Microsoft.Extensions.Logging;
-#endif
 
 using Polly;
 
+using THNETII.CommandLine.Hosting;
 using THNETII.Common;
 
 namespace Couven92.TwitchSearch.TwitchSearchCli
@@ -24,54 +22,50 @@ namespace Couven92.TwitchSearch.TwitchSearchCli
     {
         public static Task<int> Main(string[] args)
         {
-            return new CommandLineBuilder(new RootCommand(GetDescription()))
+            return new CommandLineBuilder(
+                new RootCommand(GetDescription()))
                 .UseDefaults()
-                .UseHost(CreateHostBuilder)
+                .UseHost(Host.CreateDefaultBuilder, ConfigureHost)
                 .Build().InvokeAsync(args);
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-#if DEBUG
-                .ConfigureLogging(logging => logging.AddDebug())
-#endif
-                .ConfigureHostConfiguration(config =>
-                {
-                    config.AddUserSecrets<TwitchSearchCliApp>(optional: true);
-                })
-                .ConfigureServices(services =>
-                {
-                    services.AddHttpClient("twitch")
-                        .ConfigureHttpClient((serviceProvider, httpClient) =>
+        private static void ConfigureHost(IHostBuilder host) => host
+            .ConfigureHostConfiguration(config =>
+            {
+                config.AddUserSecrets(typeof(Program).Assembly, optional: true, reloadOnChange: true);
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddHttpClient("twitch")
+                    .ConfigureHttpClient((serviceProvider, httpClient) =>
+                    {
+                        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                        if (configuration.GetValue<string>("Twitch:ClientId").TryNotNullOrWhiteSpace(out string clientId))
                         {
-                            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                            if (configuration.GetValue<string>("TwitchApi:ClientId").TryNotNullOrWhiteSpace(out string clientId))
+                            httpClient.DefaultRequestHeaders.Add("Client-ID", clientId);
+                        }
+                    })
+                    .AddPolicyHandler(Policy
+                        .HandleResult<HttpResponseMessage>(msg => (int)msg.StatusCode == 429)
+                        .WaitAndRetryForeverAsync(
+                            sleepDurationProvider: (i, error, ctx) =>
                             {
-                                httpClient.DefaultRequestHeaders.Add("Client-ID", clientId);
-                            }
-                        })
-                        .AddPolicyHandler(Policy
-                            .HandleResult<HttpResponseMessage>(msg => (int)msg.StatusCode == 429)
-                            .WaitAndRetryForeverAsync(
-                                sleepDurationProvider: (i, error, ctx) =>
+                                var msg = error.Result;
+                                TimeSpan? resetTimespan = null;
+                                if (msg.Headers.Date.HasValue &&
+                                    msg.Headers.TryGetValues("Ratelimit-Reset", out var ratelimitResetHeaderValues) &&
+                                    ratelimitResetHeaderValues.FirstOrDefault().TryNotNullOrEmpty(out string ratelimitResetString) &&
+                                    int.TryParse(ratelimitResetString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ratelimitResetEpochOffsetSeconds))
                                 {
-                                    var msg = error.Result;
-                                    TimeSpan? resetTimespan = null;
-                                    if (msg.Headers.Date.HasValue &&
-                                        msg.Headers.TryGetValues("Ratelimit-Reset", out var ratelimitResetHeaderValues) &&
-                                        ratelimitResetHeaderValues.FirstOrDefault().TryNotNullOrEmpty(out string ratelimitResetString) &&
-                                        int.TryParse(ratelimitResetString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ratelimitResetEpochOffsetSeconds))
-                                    {
-                                        var epoch = new DateTimeOffset(1970, 01, 01, 00, 00, 00, TimeSpan.Zero);
-                                        var resetTimestamp = epoch + TimeSpan.FromSeconds(ratelimitResetEpochOffsetSeconds);
-                                        resetTimespan = resetTimestamp - msg.Headers.Date.Value;
-                                    }
+                                    var epoch = new DateTimeOffset(1970, 01, 01, 00, 00, 00, TimeSpan.Zero);
+                                    var resetTimestamp = epoch + TimeSpan.FromSeconds(ratelimitResetEpochOffsetSeconds);
+                                    resetTimespan = resetTimestamp - msg.Headers.Date.Value;
+                                }
 
-                                    return resetTimespan ?? TimeSpan.FromSeconds(10);
-                                },
-                                onRetryAsync: (msg, ts, i, ctx) => Task.CompletedTask)
-                        );
-                    services.AddHostedService<TwitchSearchCliApp>();
-                });
+                                return resetTimespan ?? TimeSpan.FromSeconds(10);
+                            },
+                            onRetryAsync: (msg, ts, i, ctx) => Task.CompletedTask)
+                    );
+            });
     }
 }
