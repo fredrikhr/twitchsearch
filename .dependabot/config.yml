@@ -15,4 +15,4 @@ update_configs:
   - couven92
   automerged_updates:
   - match:
-update_type: "all"
+      update_type: "all"
