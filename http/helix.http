@@ -1,0 +1,29 @@
+@token = {{$processEnv TwitchOAuthToken}}
+@clientid = {{$processEnv TwitchClientId}}
+
+###
+# @name user_me
+GET https://api.twitch.tv/helix/users
+Authorization: Bearer {{token}}
+Client-ID: {{clientid}}
+
+###
+# @name videos_me
+GET https://api.twitch.tv/helix/videos
+    ?user_id={{user_me.response.body.$.data[0].id}}
+Authorization: Bearer {{token}}
+Client-ID: {{clientid}}
+
+###
+# @name user_filthy
+GET https://api.twitch.tv/helix/users
+    ?login=FilthyRobot
+Authorization: Bearer {{token}}
+Client-ID: {{clientid}}
+
+###
+# @name videos_FilthyRobot
+GET https://api.twitch.tv/helix/videos
+    ?user_id={{user_filthy.response.body.$.data[0].id}}
+Authorization: Bearer {{token}}
+Client-ID: {{clientid}}

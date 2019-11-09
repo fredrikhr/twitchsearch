@@ -1,0 +1,37 @@
+@token = {{$processEnv TwitchOAuthToken}}
+@clientid = {{$processEnv TwitchClientId}}
+
+###
+POST https://gql.twitch.tv/gql
+Authorization: OAuth {{token}}
+Client-Id: {{clientid}}
+X-REQUEST-TYPE: GraphQL
+
+query {
+  user(login: "FilthyRobot") {
+    id
+    displayName
+    videos(sort: TIME) {
+      totalCount
+      edges {
+        node {
+          id
+          title
+          description
+          game {
+            id
+            name
+            displayName
+          }
+          createdAt
+          publishedAt
+          recordedAt
+          lengthSeconds
+          language
+          broadcastType
+        }
+        cursor
+      }
+    }
+  }
+}
