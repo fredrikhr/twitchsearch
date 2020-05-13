@@ -2,8 +2,6 @@
 <Project>
   <PropertyGroup Label="Common Package Metadata">
     <Authors>Fredrik Høisæther Rasch</Authors>
-    <Product></Product>
-    <Company>TH-NETII Rasch Solutions</Company>
     <Copyright>Written by Fredrik Høisæther Rasch, $([System.DateTime]::Now.Year)</Copyright>
     <PackageProjectUrl>https://github.com/couven92/twitchsearch</PackageProjectUrl>
   </PropertyGroup>
